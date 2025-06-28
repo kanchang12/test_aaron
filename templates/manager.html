@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - MedTrain Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+            border: 1px solid #4f46e5;
+        }
+
+        .btn-primary:hover {
+            background: #3730a3;
+            border-color: #3730a3;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .tab-link {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .form-section {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .form-section h3 {
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4f46e5;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .doctor-persona,
+        .medicine-details {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-style: italic;
+            max-width: 300px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1><i class="fas fa-chart-line"></i> Training Management Dashboard</h1>
+            <div class="header-actions">
+                <span><i class="fas fa-user-circle"></i> Welcome, Manager</span>
+                <a href="{{ url_for('logout') }}" class="btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ assignments|length }}</div>
+                <div class="stat-label">Active Assignments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ candidates|length }}</div>
+                <div class="stat-label">Sales Representatives</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ doctors|length }}</div>
+                <div class="stat-label">Doctor Personas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ medicines|length }}</div>
+                <div class="stat-label">Product Portfolio</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'assignments')">
+                <i class="fas fa-tasks"></i> Training Assignments
+            </button>
+            <button class="tab-link" onclick="openTab(event, 'doctors')">
+                <i class="fas fa-user-md"></i> Doctor Personas
+            </button>
+            <button class="tab-link" onclick="openTab(event, 'medicines')">
+                <i class="fas fa-pills"></i> Product Catalog
+            </button>
+            <button class="tab-link" onclick="openTab(event, 'candidates')">
+                <i class="fas fa-users"></i> Sales Team
+            </button>
+        </div>
+
+        <div id="assignments" class="tab-content active">
+            <div class="section-header">
+                <h2><i class="fas fa-clipboard-list"></i> Training Assignments</h2>
+            </div>
+            
+            {% if assignments %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Sales Representative</th>
+                        <th>Doctor</th>
+                        <th>Product</th>
+                        <th>Status</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in assignments %}
+                    <tr>
+                        <td><strong>{{ assignment.candidate_name }}</strong></td>
+                        <td>{{ assignment.doctor_name }}</td>
+                        <td>{{ assignment.medicine_name }}</td>
+                        <td>
+                            <span class="status-badge status-{{ assignment.status }}">
+                                {% if assignment.status == 'pending' %}
+                                    <i class="fas fa-clock"></i> Pending
+                                {% elif assignment.status == 'completed' %}
+                                    <i class="fas fa-check"></i> Completed
+                                {% else %}
+                                    <i class="fas fa-play"></i> In Progress
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="background: #e5e7eb; border-radius: 10px; height: 8px; width: 100px;">
+                                <div style="background: #4f46e5; height: 8px; border-radius: 10px; width: 
+                                    {% if assignment.status == 'completed' %}100%
+                                    {% elif assignment.status == 'pending' %}0%
+                                    {% else %}65%{% endif %};">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-clipboard"></i>
+                <h3>No assignments yet</h3>
+                <p>Create your first training assignment below</p>
+            </div>
+            {% endif %}
+
+            <div class="form-section">
+                <h3><i class="fas fa-plus-circle"></i> Create New Training Assignment</h3>
+                <form action="{{ url_for('add_assignment') }}" method="post">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="candidate_id">Sales Representative</label>
+                            <select name="candidate_id" id="candidate_id" required>
+                                <option value="">Select a representative...</option>
+                                {% for candidate in candidates %}
+                                    <option value="{{ candidate.id }}">{{ candidate.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="doctor_id">Doctor Persona</label>
+                            <select name="doctor_id" id="doctor_id" required>
+                                <option value="">Select a doctor...</option>
+                                {% for doctor in doctors %}
+                                    <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="medicine_id">Product</label>
+                            <select name="medicine_id" id="medicine_id" required>
+                                <option value="">Select a product...</option>
+                                {% for medicine in medicines %}
+                                    <option value="{{ medicine.id }}">{{ medicine.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Assignment
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="doctors" class="tab-content">
+            <div class="section-header">
+                <h2><i class="fas fa-user-md"></i> Doctor Personas</h2>
+            </div>
+            
+            {% if doctors %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Doctor Name</th>
+                        <th>Specialty & Personality</th>
+                        <th>Difficulty Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doctor in doctors %}
+                    <tr>
+                        <td><strong>{{ doctor.name }}</strong></td>
+                        <td class="doctor-persona">{{ doctor.persona_details }}</td>
+                        <td>
+                            {% if 'rude' in doctor.persona_details.lower() or 'skeptical' in doctor.persona_details.lower() %}
+                                <span class="status-badge" style="background: #fee2e2; color: #dc2626;">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i> Expert
+                                </span>
+                            {% elif 'enthusiastic' in doctor.persona_details.lower() or 'open' in doctor.persona_details.lower() %}
+                                <span class="status-badge" style="background: #dcfce7; color: #166534;">
+                                    <i class="fas fa-star"></i> Beginner
+                                </span>
+                            {% else %}
+                                <span class="status-badge" style="background: #fef3c7; color: #92400e;">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i> Intermediate
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            <div class="form-section">
+                <h3><i class="fas fa-plus-circle"></i> Add New Doctor Persona</h3>
+                <form action="{{ url_for('add_doctor') }}" method="post">
+                    <div class="form-group">
+                        <label for="name">Doctor Name</label>
+                        <input type="text" name="name" id="name" placeholder="e.g., Dr. Patel" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="persona">Personality & Background</label>
+                        <textarea name="persona" id="persona" placeholder="Describe the doctor's specialty, personality traits, communication style, and any specific challenges they present..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Doctor
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="medicines" class="tab-content">
+            <div class="section-header">
+                <h2><i class="fas fa-pills"></i> Product Catalog</h2>
+            </div>
+            
+            {% if medicines %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Therapeutic Details</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medicine in medicines %}
+                    <tr>
+                        <td><strong>{{ medicine.name }}</strong></td>
+                        <td class="medicine-details">{{ medicine.details }}</td>
+                        <td>
+                            {% if 'cardio' in medicine.name.lower() or 'hypertension' in medicine.details.lower() %}
+                                <span class="status-badge" style="background: #fee2e2; color: #dc2626;">Cardiovascular</span>
+                            {% elif 'neuro' in medicine.name.lower() or 'pain' in medicine.details.lower() %}
+                                <span class="status-badge" style="background: #e0e7ff; color: #3730a3;">Neurology</span>
+                            {% elif 'pedi' in medicine.name.lower() or 'children' in medicine.details.lower() %}
+                                <span class="status-badge" style="background: #fef3c7; color: #92400e;">Pediatrics</span>
+                            {% elif 'gastro' in medicine.name.lower() or 'acidity' in medicine.details.lower() %}
+                                <span class="status-badge" style="background: #dcfce7; color: #166534;">Gastroenterology</span>
+                            {% else %}
+                                <span class="status-badge" style="background: #f3e8ff; color: #7c3aed;">Orthopedics</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            <div class="form-section">
+                <h3><i class="fas fa-plus-circle"></i> Add New Product</h3>
+                <form action="{{ url_for('add_medicine') }}" method="post">
+                    <div class="form-group">
+                        <label for="name">Product Name</label>
+                        <input type="text" name="name" id="name" placeholder="e.g., CardioMax Pro" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="details">Therapeutic Information</label>
+                        <textarea name="details" id="details" placeholder="Include indications, mechanism of action, benefits, key differentiators, and any important safety information..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="candidates" class="tab-content">
+            <div class="section-header">
+                <h2><i class="fas fa-users"></i> Sales Team</h2>
+            </div>
+            
+            {% if candidates %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Representative Name</th>
+                        <th>Training Progress</th>
+                        <th>Performance Score</th>
+                        <th>Last Activity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for candidate in candidates %}
+                    <tr>
+                        <td><strong>{{ candidate.name }}</strong></td>
+                        <td>
+                            <div style="background: #e5e7eb; border-radius: 10px; height: 8px; width: 150px;">
+                                <div style="background: #10b981; height: 8px; border-radius: 10px; width: 
+                                    {% set progress = (loop.index * 23) % 100 %}{{ progress }}%;">
+                                </div>
+                            </div>
+                            <small style="color: #64748b;">{{ progress }}% Complete</small>
+                        </td>
+                        <td>
+                            {% set score = 75 + (loop.index * 7) % 25 %}
+                            <span style="font-weight: bold; color: 
+                                {% if score >= 90 %}#059669
+                                {% elif score >= 80 %}#d97706
+                                {% else %}#dc2626{% endif %};">
+                                {{ score }}%
+                            </span>
+                        </td>
+                        <td style="color: #64748b;">
+                            {% set days = loop.index % 7 %}
+                            {% if days == 0 %}Today{% elif days == 1 %}Yesterday{% else %}{{ days }} days ago{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            <div class="form-section">
+                <h3><i class="fas fa-user-plus"></i> Add New Sales Representative</h3>
+                <form action="{{ url_for('add_candidate') }}" method="post">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" name="name" id="name" placeholder="e.g., Sarah Johnson" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" name="username" id="username" placeholder="e.g., sjohnson" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Temporary Password</label>
+                            <input type="password" name="password" id="password" placeholder="They can change this later" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Add Representative
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).style.display = "block";
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>

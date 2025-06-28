@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Session with {{ doctor.name }} - MedTrain Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1000px;
+            margin: 1rem auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.03)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .doctor-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .doctor-specialty {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .doctor-persona {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            font-style: italic;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .session-info {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #f8fafc;
+            min-height: 400px;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 20px 20px 5px 20px;
+            margin-left: auto;
+            max-width: 80%;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+            position: relative;
+        }
+
+        .user-message::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 10px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #7c3aed;
+        }
+
+        .doctor-message {
+            background: white;
+            color: #1e293b;
+            padding: 1rem 1.5rem;
+            border-radius: 20px 20px 20px 5px;
+            margin-right: auto;
+            max-width: 80%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .doctor-message::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 10px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+        }
+
+        .chat-input {
+            background: white;
+            padding: 2rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .voice-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .voice-button.listening {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        .voice-button.listening::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-button.listening::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: ripple 1.5s infinite 0.5s;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+
+        @keyframes ripple {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+        }
+
+        .status-panel {
+            flex: 1;
+            text-align: center;
+        }
+
+        .status-text {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 0.2rem;
+            margin-left: 0.5rem;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #059669;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+            opacity: 0;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        .typing-indicator.active .dot {
+            opacity: 1;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-7px); }
+        }
+
+        .back-button {
+            background: #64748b;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-button:hover {
+            background: #475569;
+            transform: translateY(-1px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                margin: 0.5rem;
+                border-radius: 16px;
+            }
+
+            .chat-header {
+                padding: 1.5rem;
+            }
+
+            .chat-messages {
+                padding: 1rem;
+            }
+
+            .chat-input {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .voice-controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="session-info">
+                <i class="fas fa-clock"></i> Training Session
+            </div>
+            <div class="doctor-avatar">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <h2>{{ doctor.name }}</h2>
+            <div class="doctor-specialty">
+                {% if 'cardiologist' in doctor.persona_details.lower() %}
+                    Cardiologist • All India Institute of Medical Sciences, Delhi
+                {% elif 'pediatrician' in doctor.persona_details.lower() %}
+                    Pediatrician • Bangalore Children's Hospital
+                {% elif 'physician' in doctor.persona_details.lower() %}
+                    General Physician • Mumbai Medical Center
+                {% else %}
+                    Medical Specialist • Multi-specialty Hospital
+                {% endif %}
+            </div>
+            <div class="doctor-persona">
+                <i class="fas fa-quote-left"></i>
+                {{ doctor.persona_details }}
+                <i class="fas fa-quote-right"></i>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+        </div>
+
+        <div class="chat-input">
+            <div class="voice-controls">
+                <button id="session-btn" class="voice-button" title="Start/Stop Conversation">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="status-panel">
+                    <div class="status-text" id="status">Ready</div>
+                    <div class="status-indicator">
+                        <i class="fas fa-microphone"></i>
+                        <span id="status-message">Click to start - AI responds after 1 sec silence</span>
+                        <div class="typing-indicator" id="typing-indicator">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="{{ url_for('candidate') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+<script>
+    class Conversation {
+        constructor() {
+            this.sessionBtn = document.getElementById('session-btn');
+            this.chatMessages = document.getElementById('chat-messages');
+            this.statusDiv = document.getElementById('status');
+            this.statusMessage = document.getElementById('status-message');
+            this.typingIndicator = document.getElementById('typing-indicator');
+
+            this.recognition = null;
+            this.isSessionActive = false;
+            this.isSpeaking = false;
+
+            this.doctorPersona = "{{ doctor.persona_details }}";
+            this.assignmentId = {{ assignment.id if assignment else 1 }};
+
+            this.init();
+        }
+
+        init() {
+            this.sessionBtn.addEventListener('click', () => this.toggleSession());
+            this.updateUI('ready', 'Click to start conversation - AI responds after 1 sec silence');
+
+            if (!('webkitSpeechRecognition' in window) || !('speechSynthesis' in window)) {
+                this.updateUI('error', 'Browser does not support Web Speech API.');
+                this.sessionBtn.disabled = true;
+            }
+        }
+
+        async toggleSession() {
+            if (this.isSessionActive) {
+                this.endSession();
+            } else {
+                this.startSession();
+            }
+        }
+
+        startSession() {
+            if (this.isSessionActive) return;
+
+            this.isSessionActive = true;
+            this.updateUI('starting', 'Starting conversation...');
+            this.startSpeechRecognition();
+        }
+
+        endSession() {
+            if (!this.isSessionActive) return;
+
+            this.isSessionActive = false;
+            if (this.recognition) {
+                this.recognition.stop();
+            }
+            this.updateUI('ended', 'Conversation ended');
+
+            // Mark interview as complete
+            fetch('/complete_interview', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assignment_id: this.assignmentId })
+            }).catch(error => console.error('Complete interview error:', error));
+        }
+
+        startSpeechRecognition() {
+            if (this.recognition) {
+                this.recognition.stop();
+            }
+            this.recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
+            this.recognition.continuous = true;
+            this.recognition.interimResults = true;
+            this.recognition.lang = 'en-US';
+
+            let silenceTimer = null;
+            let finalTranscript = '';
+
+            this.recognition.onstart = () => {
+                this.updateUI('listening', 'Speak now - AI responds after 1 sec silence');
+            };
+
+            this.recognition.onresult = (event) => {
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                if (silenceTimer) {
+                    clearTimeout(silenceTimer);
+                }
+
+                if (interimTranscript.trim() || finalTranscript.trim()) {
+                    silenceTimer = setTimeout(() => {
+                        if (finalTranscript.trim() && !this.isSpeaking) {
+                            this.addMessage(finalTranscript.trim(), 'user');
+                            this.sendToDoctor(finalTranscript.trim());
+                            finalTranscript = '';
+                        }
+                    }, 1000);
+                }
+            };
+
+            this.recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error !== 'no-speech' && event.error !== 'audio-capture') {
+                    this.updateUI('error', `Recognition error: ${event.error}`);
+                }
+                if (this.isSessionActive && !this.isSpeaking) {
+                    setTimeout(() => {
+                        if (this.isSessionActive) {
+                            this.startSpeechRecognition();
+                        }
+                    }, 1000);
+                }
+            };
+
+            this.recognition.onend = () => {
+                if (this.isSessionActive && !this.isSpeaking) {
+                    setTimeout(() => {
+                        if (this.isSessionActive) {
+                            this.startSpeechRecognition();
+                        }
+                    }, 100);
+                } else if (!this.isSessionActive) {
+                    this.updateUI('ended', 'Session ended');
+                }
+            };
+
+            this.recognition.start();
+        }
+
+        async sendToDoctor(userMessage) {
+            this.updateUI('thinking', 'Doctor is thinking...', false, true);
+            try {
+                const response = await fetch('/ask_doctor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: userMessage, 
+                        doctor_persona: this.doctorPersona
+                    })
+                });
+                const data = await response.json();
+
+                if (data.reply) {
+                    this.addMessage(data.reply, 'doctor');
+                    this.speakDoctorReply(data.reply);
+                } else if (data.error) {
+                    console.error('Doctor reply error:', data.error);
+                    this.updateUI('error', `Doctor error: ${data.error}`);
+                    if (this.isSessionActive) {
+                        setTimeout(() => {
+                            this.startSpeechRecognition();
+                            this.updateUI('listening', 'Speak now - AI responds after 1 sec silence');
+                        }, 2000);
+                    }
+                }
+            } catch (error) {
+                console.error('Fetch doctor reply error:', error);
+                this.updateUI('error', `Communication error: ${error.message}`);
+                if (this.isSessionActive) {
+                    setTimeout(() => {
+                        this.startSpeechRecognition();
+                        this.updateUI('listening', 'Speak now - AI responds after 1 sec silence');
+                    }, 2000);
+                }
+            } finally {
+                this.typingIndicator.classList.remove('active');
+            }
+        }
+
+        async speakDoctorReply(text) {
+            this.isSpeaking = true;
+            
+            if (this.recognition) {
+                this.recognition.stop();
+            }
+            
+            this.updateUI('speaking', 'Doctor speaking...');
+
+            try {
+                const response = await fetch('/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+
+                audio.onended = () => {
+                    this.isSpeaking = false;
+                    URL.revokeObjectURL(audioUrl);
+                    if (this.isSessionActive) {
+                        setTimeout(() => {
+                            if (this.isSessionActive) {
+                                this.startSpeechRecognition();
+                                this.updateUI('listening', 'Speak now - AI responds after 1 sec silence');
+                            }
+                        }, 1000);
+                    } else {
+                        this.updateUI('ended', 'Session ended');
+                    }
+                };
+
+                audio.onerror = (e) => {
+                    console.error('Audio playback error:', e);
+                    this.isSpeaking = false;
+                    URL.revokeObjectURL(audioUrl);
+                    if (this.isSessionActive) {
+                        setTimeout(() => {
+                            if (this.isSessionActive) {
+                                this.startSpeechRecognition();
+                                this.updateUI('listening', 'Speak now - AI responds after 1 sec silence');
+                            }
+                        }, 1000);
+                    } else {
+                        this.updateUI('ended', 'Session ended');
+                    }
+                };
+
+                audio.play();
+
+            } catch (error) {
+                console.error('ElevenLabs TTS error:', error);
+                this.updateUI('error', `Voice synthesis error: ${error.message}`);
+                this.isSpeaking = false;
+                if (this.isSessionActive) {
+                    setTimeout(() => {
+                        if (this.isSessionActive) {
+                            this.startSpeechRecognition();
+                            this.updateUI('listening', 'Speak now - AI responds after 1 sec silence');
+                        }
+                    }, 2000);
+                } else {
+                    this.updateUI('ended', 'Session ended');
+                }
+            }
+        }
+
+        updateUI(status, message, isListening = false, showTyping = false) {
+            this.statusDiv.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            this.statusMessage.textContent = message;
+
+            if (this.isSessionActive) {
+                this.sessionBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                this.sessionBtn.classList.add('listening');
+            } else {
+                this.sessionBtn.innerHTML = '<i class="fas fa-play"></i>';
+                this.sessionBtn.classList.remove('listening');
+            }
+
+            if (showTyping) {
+                this.typingIndicator.classList.add('active');
+            } else {
+                this.typingIndicator.classList.remove('active');
+            }
+        }
+
+        addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `${sender}-message`);
+            messageDiv.textContent = text;
+            this.chatMessages.appendChild(messageDiv);
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        new Conversation();
+    });
+</script>
+</body>
+</html>
